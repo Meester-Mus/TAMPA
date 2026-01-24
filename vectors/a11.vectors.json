@@ -1,0 +1,74 @@
+[
+  {
+    "input": {
+      "oracle_state": "stable",
+      "timestamp": 1000,
+      "value": 42
+    },
+    "expected": {
+      "is_stable": true,
+      "confidence": 1.0,
+      "oracle_id": "A11-ORACLE-v0"
+    }
+  },
+  {
+    "input": {
+      "oracle_state": "stable",
+      "timestamp": 2000,
+      "value": 100
+    },
+    "expected": {
+      "is_stable": true,
+      "confidence": 1.0,
+      "oracle_id": "A11-ORACLE-v0"
+    }
+  },
+  {
+    "input": {
+      "oracle_state": "unstable",
+      "timestamp": 3000,
+      "value": 0
+    },
+    "expected": {
+      "is_stable": false,
+      "confidence": 0.0,
+      "oracle_id": "A11-ORACLE-v0"
+    }
+  },
+  {
+    "input": {
+      "oracle_state": "stable",
+      "timestamp": 4000,
+      "value": 255
+    },
+    "expected": {
+      "is_stable": true,
+      "confidence": 1.0,
+      "oracle_id": "A11-ORACLE-v0"
+    }
+  },
+  {
+    "input": {
+      "oracle_state": "unstable",
+      "timestamp": 5000,
+      "value": -1
+    },
+    "expected": {
+      "is_stable": false,
+      "confidence": 0.0,
+      "oracle_id": "A11-ORACLE-v0"
+    }
+  },
+  {
+    "input": {
+      "oracle_state": "stable",
+      "timestamp": 6000,
+      "value": 128
+    },
+    "expected": {
+      "is_stable": true,
+      "confidence": 1.0,
+      "oracle_id": "A11-ORACLE-v0"
+    }
+  }
+]

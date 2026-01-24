@@ -1,0 +1,122 @@
+[
+  {
+    "input": {
+      "signal_strength": 95,
+      "priority": "high",
+      "source": "internal"
+    },
+    "expected": {
+      "decision": "priority_lane_1",
+      "confidence": 0.95,
+      "thresholds_id": "A6-DEFAULT-v0"
+    }
+  },
+  {
+    "input": {
+      "signal_strength": 75,
+      "priority": "high",
+      "source": "external"
+    },
+    "expected": {
+      "decision": "priority_lane_1",
+      "confidence": 0.75,
+      "thresholds_id": "A6-DEFAULT-v0"
+    }
+  },
+  {
+    "input": {
+      "signal_strength": 60,
+      "priority": "medium",
+      "source": "internal"
+    },
+    "expected": {
+      "decision": "priority_lane_2",
+      "confidence": 0.60,
+      "thresholds_id": "A6-DEFAULT-v0"
+    }
+  },
+  {
+    "input": {
+      "signal_strength": 55,
+      "priority": "medium",
+      "source": "external"
+    },
+    "expected": {
+      "decision": "priority_lane_2",
+      "confidence": 0.55,
+      "thresholds_id": "A6-DEFAULT-v0"
+    }
+  },
+  {
+    "input": {
+      "signal_strength": 40,
+      "priority": "low",
+      "source": "internal"
+    },
+    "expected": {
+      "decision": "priority_lane_3",
+      "confidence": 0.40,
+      "thresholds_id": "A6-DEFAULT-v0"
+    }
+  },
+  {
+    "input": {
+      "signal_strength": 30,
+      "priority": "low",
+      "source": "external"
+    },
+    "expected": {
+      "decision": "priority_lane_3",
+      "confidence": 0.30,
+      "thresholds_id": "A6-DEFAULT-v0"
+    }
+  },
+  {
+    "input": {
+      "signal_strength": 85,
+      "priority": "high",
+      "source": "internal"
+    },
+    "expected": {
+      "decision": "priority_lane_1",
+      "confidence": 0.85,
+      "thresholds_id": "A6-DEFAULT-v0"
+    }
+  },
+  {
+    "input": {
+      "signal_strength": 50,
+      "priority": "medium",
+      "source": "internal"
+    },
+    "expected": {
+      "decision": "priority_lane_2",
+      "confidence": 0.50,
+      "thresholds_id": "A6-DEFAULT-v0"
+    }
+  },
+  {
+    "input": {
+      "signal_strength": 20,
+      "priority": "low",
+      "source": "external"
+    },
+    "expected": {
+      "decision": "priority_lane_3",
+      "confidence": 0.20,
+      "thresholds_id": "A6-DEFAULT-v0"
+    }
+  },
+  {
+    "input": {
+      "signal_strength": 100,
+      "priority": "high",
+      "source": "internal"
+    },
+    "expected": {
+      "decision": "priority_lane_1",
+      "confidence": 1.0,
+      "thresholds_id": "A6-DEFAULT-v0"
+    }
+  }
+]

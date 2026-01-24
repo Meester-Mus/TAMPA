@@ -1,0 +1,62 @@
+[
+  {
+    "input": {
+      "product_type": "meta",
+      "placement_request": "top",
+      "transition_required": true
+    },
+    "expected": {
+      "placement": "meta_top",
+      "transition_allowed": true,
+      "placement_id": "A12-PLACEMENT-v0"
+    }
+  },
+  {
+    "input": {
+      "product_type": "standard",
+      "placement_request": "middle",
+      "transition_required": false
+    },
+    "expected": {
+      "placement": "standard_middle",
+      "transition_allowed": false,
+      "placement_id": "A12-PLACEMENT-v0"
+    }
+  },
+  {
+    "input": {
+      "product_type": "meta",
+      "placement_request": "bottom",
+      "transition_required": true
+    },
+    "expected": {
+      "placement": "meta_bottom",
+      "transition_allowed": true,
+      "placement_id": "A12-PLACEMENT-v0"
+    }
+  },
+  {
+    "input": {
+      "product_type": "standard",
+      "placement_request": "top",
+      "transition_required": false
+    },
+    "expected": {
+      "placement": "standard_top",
+      "transition_allowed": false,
+      "placement_id": "A12-PLACEMENT-v0"
+    }
+  },
+  {
+    "input": {
+      "product_type": "meta",
+      "placement_request": "middle",
+      "transition_required": true
+    },
+    "expected": {
+      "placement": "meta_middle",
+      "transition_allowed": true,
+      "placement_id": "A12-PLACEMENT-v0"
+    }
+  }
+]
