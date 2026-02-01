@@ -1,0 +1,27 @@
+{
+  "version": "v1",
+  "name": "canon_change_policy",
+  "description": "Policy for reviewing and accepting canonical specification changes",
+  "rules": {
+    "require_review": true,
+    "min_reviewers": 1,
+    "require_signature": true,
+    "signature_type": "gpg",
+    "review_timeout_hours": 168,
+    "auto_reject_on_timeout": false
+  },
+  "review_criteria": [
+    "Proposal clearly documents rationale",
+    "Changes are backward compatible where possible",
+    "Test vectors updated if applicable",
+    "Security implications reviewed",
+    "Performance impact assessed"
+  ],
+  "rejection_reasons": [
+    "Insufficient rationale",
+    "Breaks backward compatibility without justification",
+    "Security concerns",
+    "Conflicts with existing canon",
+    "Implementation complexity too high"
+  ]
+}

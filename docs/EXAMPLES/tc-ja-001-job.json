@@ -1,0 +1,21 @@
+{
+  "job_id": "tc-ja-001",
+  "job_type": "test_case",
+  "description": "Test case JA-001: Simple arithmetic computation",
+  "agent_code": "# PoC: Manual ChatGPT agent paste required\n# Prompt: Calculate the sum of numbers 1 through 10",
+  "inputs": {
+    "operation": "sum",
+    "range_start": 1,
+    "range_end": 10
+  },
+  "expected_output": {
+    "result": 55,
+    "computation": "1+2+3+4+5+6+7+8+9+10"
+  },
+  "metadata": {
+    "category": "arithmetic",
+    "difficulty": "easy",
+    "deterministic": true,
+    "created": "2024-01-01T00:00:00Z"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "version": "v1",
+  "name": "authority_config",
+  "description": "Configuration for decision authority and signing",
+  "authority": {
+    "name": "TAMPA Canon Holder",
+    "type": "centralized",
+    "contact": "authority@tampa.example"
+  },
+  "signing": {
+    "default_method": "gpg",
+    "gpg_key_id": null,
+    "jws_algorithm": "RS256",
+    "require_detached_signature": true
+  },
+  "review_process": {
+    "require_approval": true,
+    "approval_threshold": 1,
+    "reviewers": []
+  },
+  "notes": [
+    "This is a PoC configuration",
+    "GPG key ID should be configured in production",
+    "Reviewers list should be populated with authorized reviewers"
+  ]
+}

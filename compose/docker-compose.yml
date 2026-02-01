@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: tampa-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  app:
+    build:
+      context: ..
+      dockerfile: docker/app.Dockerfile
+    container_name: tampa-datanet-app
+    ports:
+      - "8000:8000"
+    environment:
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_SECURE=false
+    depends_on:
+      - minio
+    volumes:
+      - ../src:/app/src
+      - ../configs:/app/configs
+      - ../data:/app/data
+    command: uvicorn src.datanet.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  minio_data:
