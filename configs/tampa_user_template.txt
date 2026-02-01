@@ -1,0 +1,19 @@
+# User prompt template (invulbare template voor de user message)
+# Vervang de placeholders tussen {} met werkelijke waarden bij elke call.
+
+Query: {QUERY}
+
+Canonical sample (first ~200 chars):
+{CANONICAL_SAMPLE}
+
+Canonical full text:
+{CANONICAL_TEXT}
+
+DRHash (sha256 of canonical_text):
+{DRHASH}
+
+Source URL (if available):
+{SOURCE_URL_OR_NA}
+
+INSTRUCTIE:
+Gebruik alleen bovenstaande canonical_text / canonical_sample / drhash als bron voor bewijs. Volg strikt de system prompt (configs/tampa_prompt_v1.txt) en retourneer EXACT één JSON‑object volgens het TAMPA‑schema. Voeg `prompt_version: "tampa_prompt_v1"` en `model_version` toe in de JSON.
