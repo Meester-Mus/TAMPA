@@ -92,4 +92,32 @@ Contributie & review
 Contact / hulp
 - Als je hulp nodig hebt bij het toepassen van de patch, het uitvoeren van de script of fixen van CI‑fouten: plak hier de foutmelding en ik help je stap‑voor‑stap.
 
+##### Vector search (FAISS) prototype
+
+This adds a small FAISS-based prototype for semantic search using sentence-transformers embeddings.
+
+Files:
+- src/mcp/vector_search.py — index build & search functions
+- scripts/build_faiss_index.py — helper CLI to (re)build the index
+- tests/test_mcp_vector.py — smoke test (skipped if FAISS deps missing)
+
+Install heavy deps (locally / in CI runners) before running:
+```bash
+pip install faiss-cpu sentence-transformers numpy joblib
+```
+
+Build index:
+```bash
+python scripts/build_faiss_index.py --data-root data
+```
+
+Search (Python REPL):
+```python
+from mcp.vector_search import search
+print(search("your query", k=3))
+```
+
+Notes:
+- faiss-cpu and sentence-transformers are heavy dependencies and will increase CI run time and image size. Consider making tests conditional or using a separate job with larger runner if adding to CI.
+
 Einde

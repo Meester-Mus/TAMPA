@@ -1,0 +1,18 @@
+feat(mcp): add FAISS vector search prototype
+
+Added:
+- src/mcp/vector_search.py — FAISS index build & search prototype
+- scripts/build_faiss_index.py — CLI helper
+- tests/test_mcp_vector.py — smoke test (skips if deps missing)
+- README.md — instructions & notes
+- requirements.txt appended: faiss-cpu, sentence-transformers, numpy, joblib
+
+Run / test locally:
+1. python -m venv .venv
+2. source .venv/bin/activate
+3. pip install -r requirements.txt
+4. python scripts/build_faiss_index.py --data-root data
+5. pytest tests/test_mcp_vector.py -q
+
+Notes:
+- FAISS and sentence-transformers are heavy. Ensure your CI runner can install them or run the vector tests in a separate job.
