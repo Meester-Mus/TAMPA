@@ -19,25 +19,35 @@ def canonicalize_v1(html: str) -> Tuple[str, str, str]:
     """
     Simple canonicalization function (placeholder implementation).
     
-    In a real implementation, this would:
-    - Parse HTML, remove scripts/styles/iframes/svg/canvas
-    - Prefer <article> or <main> content
-    - Decode entities, normalize Unicode to NFC
-    - Normalize quotes/dashes to ASCII
-    - Collapse whitespace
+    ⚠️ WARNING: This is a simplified test implementation with known limitations.
+    It uses regex for HTML tag removal which cannot handle all edge cases.
+    
+    In production, use proper HTML parsing libraries (BeautifulSoup, lxml)
+    which correctly handle:
+    - Malformed HTML
+    - Edge cases like </script > with whitespace
+    - Nested tags
+    - CDATA sections
+    - Comments
+    
+    For production implementation, see configs/canonicalizer_guidance.txt
     
     Returns:
         Tuple of (canonical_text, canonical_sample, drhash)
     """
-    # Simplified implementation for testing
-    # In production, use proper HTML parsing (e.g., BeautifulSoup, lxml)
+    # Simplified implementation for testing only
     import re
     from html import unescape
     import unicodedata
     
-    # Remove script and style tags
-    text = re.sub(r'<script[^>]*>.*?</script>', '', html, flags=re.DOTALL | re.IGNORECASE)
-    text = re.sub(r'<style[^>]*>.*?</style>', '', html, flags=re.DOTALL | re.IGNORECASE)
+    # Remove script and style tags using aggressive regex
+    # Known limitation: May not catch malformed tags with unusual whitespace
+    # This is acceptable for a test helper but NOT for production use
+    text = html
+    # Remove everything between script tags (multiple passes to handle nesting)
+    for _ in range(3):  # Multiple passes to handle nested/malformed tags
+        text = re.sub(r'<script[^>]*>.*?</script[^>]*>', '', text, flags=re.DOTALL | re.IGNORECASE)
+        text = re.sub(r'<style[^>]*>.*?</style[^>]*>', '', text, flags=re.DOTALL | re.IGNORECASE)
     
     # Remove HTML tags
     text = re.sub(r'<[^>]+>', ' ', text)
