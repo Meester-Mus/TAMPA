@@ -92,4 +92,19 @@ Contributie & review
 Contact / hulp
 - Als je hulp nodig hebt bij het toepassen van de patch, het uitvoeren van de script of fixen van CI‑fouten: plak hier de foutmelding en ik help je stap‑voor‑stap.
 
+#### Metrics & observability
+
+This project exposes Prometheus metrics via the prometheus_client library used internally. Example metrics include:
+- mcp_function_calls_total (per function)
+- mcp_search_latency_seconds
+- mcp_index_document_count
+- mcp_validation_failures_total
+
+To scrape metrics, integrate the Prometheus client exposition into your application (e.g., expose /metrics) or pull metrics from the process. Run unit tests with:
+```
+pytest tests/test_mcp_metrics.py -q
+```
+
+Note: the tests exercise the metrics helpers; to actually expose metrics over HTTP, mount `prometheus_client`'s exposition in your web server (Flask/FastAPI/Starlette) and configure Prometheus to scrape that endpoint.
+
 Einde
