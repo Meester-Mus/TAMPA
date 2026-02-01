@@ -92,4 +92,13 @@ Contributie & review
 Contact / hulp
 - Als je hulp nodig hebt bij het toepassen van de patch, het uitvoeren van de script of fixen van CI‑fouten: plak hier de foutmelding en ik help je stap‑voor‑stap.
 
+MCP Search Index (TF-IDF)
+- De repository bevat nu een productie-klare TF-IDF zoekindex voor MCP-documenten.
+- Installeer dependencies: `pip install -r requirements.txt`
+- Bouw de index: `python scripts/build_mcp_index.py`
+  - Dit maakt een `data/mcp_index.joblib` bestand aan met TF-IDF vectoren over alle documenten in `data/`
+- De `search_documents()` functie in `src/mcp/functions.py` gebruikt automatisch de TF-IDF index indien beschikbaar
+- Run tests: `pytest tests/test_mcp_search.py`
+- **Note**: scikit-learn voegt zwaardere dependencies toe. Deze TF-IDF implementatie is een eenvoudig prototype geschikt voor kleine tot middelgrote schaal. Voor grotere productie-omgevingen raden we een vector database aan (bijv. Pinecone, Weaviate, Milvus).
+
 Einde
