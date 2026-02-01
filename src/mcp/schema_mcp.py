@@ -7,7 +7,7 @@ class Source(BaseModel):
     url: Optional[HttpUrl] = None
     canonicalize_version: Optional[str] = None
     drhash: str
-    extra: Optional[Dict[str, Any]] = {}
+    extra: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
 class ProvenanceBreakdown(BaseModel):
@@ -46,7 +46,7 @@ class MCPPayload(BaseModel):
     canonical_text: str
     canonical_sample: Optional[str] = None
     provenance: Provenance
-    matched_spans: List[MatchedSpan] = []
-    tools: Optional[Dict[str, ToolSpec]] = {}
+    matched_spans: List[MatchedSpan] = Field(default_factory=list)
+    tools: Optional[Dict[str, ToolSpec]] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    metadata: Optional[Dict[str, Any]] = {}
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
