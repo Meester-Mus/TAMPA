@@ -1,0 +1,111 @@
+# chore(validator): harden validate_tampa + schema + tests
+
+This PR implements validator hardening for the Datanet scaffold with strict validation rules.
+
+## Files Changed/Added:
+
+### New Files:
+1. **src/datanet/schema_tampa.py** (56 lines)
+   - Pydantic models defining the TAMPA schema for structural validation
+   - Models: `TampaOutput`, `Span`, `ProvenanceBreakdown`, `Internal`, `SupportingSource`
+   - Enforces field types, ranges, and patterns at the schema level
+
+2. **src/datanet/validate_tampa.py** (186 lines)
+   - Strict validator implementation with explicit error codes
+   - Validates required top-level fields
+   - Ensures `provenanceConfidence` and `provenance_breakdown.final` match (within 0.002 tolerance)
+   - Validates all provenance scores are within valid ranges (0.0..0.995)
+   - Verifies `internal.drhash` equals `sha256(canonical_text)`
+   - Validates each `matched_span`:
+     - Has all required fields (text, start, end, context, source_url, main_content_match, drhash)
+     - `start` and `end` are integers with `start >= 0` and `end >= start`
+     - Substring `canonical_text[start:end]` exactly matches `span.text` (Python codepoint indexing)
+   - Returns `(True, None)` on success or `(False, "error_code:details")` on failure
+   - Includes `canonicalize_v1` helper function for testing (with warnings about production use)
+
+3. **tests/tests_validate_tampa_strict.py** (314 lines)
+   - Comprehensive unit tests (8 tests, all passing)
+   - Success cases:
+     - Matching drhash with empty matched_spans
+     - Correctly matched span with valid indices
+     - Optional fields (model_version, prompt_version)
+   - Rejection cases:
+     - Drhash mismatch
+     - Span text mismatch (indices don't match substring)
+     - ProvenanceConfidence out of range (> 0.995)
+     - Missing required field
+     - Provenance breakdown mismatch
+
+4. **requirements.txt** (2 lines)
+   - `pydantic>=2.0.0` for schema validation
+   - `pytest>=7.0.0` for testing
+
+5. **.gitignore** (42 lines)
+   - Excludes Python artifacts, cache files, and IDE files
+
+### Modified Files:
+6. **README.md**
+   - Updated "Tests" section with validator test instructions
+   - Added command to run specific validator tests
+
+## How to Run/Test:
+
+### Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+### Run all tests:
+```bash
+pytest -q
+```
+
+### Run validator tests specifically:
+```bash
+pytest tests/tests_validate_tampa_strict.py -v
+```
+
+### Expected output:
+All 8 tests should pass:
+- `test_success_case_with_matching_drhash`
+- `test_drhash_mismatch_rejects`
+- `test_span_text_mismatch_rejects`
+- `test_provenance_confidence_out_of_range_rejects`
+- `test_success_case_with_matched_span`
+- `test_missing_required_field_rejects`
+- `test_provenance_breakdown_mismatch_rejects`
+- `test_optional_fields_accepted`
+
+## Important Notes:
+
+⚠️ **Breaking Change: Stricter Validation** ⚠️
+
+These changes introduce **much stricter validation** than before. Some previously accepted TAMPA outputs may now be rejected. This is intentional to ensure data integrity and correctness.
+
+### Key validation rules enforced:
+- All `matched_span` indices must **exactly** match `canonical_text` substrings (Python codepoint indexing)
+- `internal.drhash` must match `sha256(canonical_text)` 
+- Each `matched_span.drhash` must also match the canonical text hash
+- `provenanceConfidence` must be in range **0.0 to 0.995** (not 1.0)
+- All `provenance_breakdown` components must be within their specified ranges
+- `provenanceConfidence` and `provenance_breakdown.final` must match within **0.002** tolerance
+
+### Error codes returned:
+- `pydantic_validation_failed`: Schema validation failed
+- `missing_top_field:<field>`: Required field missing
+- `provenance_mismatch`: Confidence and breakdown.final don't match
+- `provenance_out_of_range`: Score outside valid range
+- `drhash_mismatch`: Hash doesn't match canonical_text
+- `span_text_mismatch_<N>`: Span indices don't match substring
+- `span_invalid_range_<N>`: Invalid start/end values
+- `span_out_of_bounds_<N>`: Indices exceed text length
+
+## Security:
+
+✅ All CodeQL security checks pass (0 alerts)
+✅ Code review feedback addressed
+✅ Test coverage includes edge cases
+
+## Branch Note:
+
+The automated tooling created branch `copilot/harden-validator-logic` instead of the originally specified `feat/validator-hardening`. The implementation is complete and follows all requirements.

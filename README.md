@@ -67,9 +67,13 @@ gh pr create --base main --head feat/add-tampa-prompts --title "chore(configs): 
 ```
 
 Tests
-- Run unit tests:
+- Run unit tests (including validator unit tests):
 ```bash
 pytest -q
+```
+- Run specific validator tests:
+```bash
+pytest tests/tests_validate_tampa_strict.py -v
 ```
 
 Waar te kijken bij issues
