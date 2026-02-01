@@ -1,0 +1,27 @@
+chore(ci): add CI workflow to run pytest
+
+## Summary
+This PR adds a GitHub Actions CI workflow that automatically runs pytest on every push and pull request to the main branch.
+
+## Purpose
+- Ensure code quality by running automated tests on all changes
+- Catch issues early before they are merged into the main branch
+- Provide continuous integration for the TAMPA project
+
+## Tests to Run
+The CI workflow will execute:
+- `pytest -q` to run all unit tests in quiet mode
+- Tests will run on `ubuntu-latest` with Python 3.9
+
+## Changes Made
+- Added `.github/workflows/ci.yml` - GitHub Actions workflow configuration
+
+## Testing Instructions
+1. Verify the workflow file is present at `.github/workflows/ci.yml`
+2. Once merged, the workflow will automatically run on push and pull request events to the main branch
+3. Check the Actions tab in GitHub to see workflow runs
+
+## Notes
+- The workflow uses Python 3.9 as mentioned in the README
+- Tests are run with pytest in quiet mode for cleaner output
+- No dependencies installation step is included yet (can be added if requirements.txt is present)
