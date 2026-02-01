@@ -92,4 +92,20 @@ Contributie & review
 Contact / hulp
 - Als je hulp nodig hebt bij het toepassen van de patch, het uitvoeren van de script of fixen van CI‑fouten: plak hier de foutmelding en ik help je stap‑voor‑stap.
 
+##### Function-calling: expanded schemas & handlers
+
+This repo contains an expanded set of function schemas and simple server-side handler implementations to support richer model workflows:
+
+- src/mcp/function_schemas.py — added fetch_full_mcp, annotate_span, export_result
+- src/mcp/fncall_handlers.py — server-side handlers for the new functions
+- tests/test_mcp_fncall.py — integration-style tests using the local data/ layout
+
+Run the new tests:
+```bash
+pytest tests/test_mcp_fncall.py -q
+```
+
+Notes:
+- These handlers are simple local implementations intended as examples. In production replace annotate_span/export_result with proper services (datastore, ticketing, object storage).
+
 Einde
