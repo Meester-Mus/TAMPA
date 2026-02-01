@@ -3,6 +3,9 @@ import pytest
 from mcp import auth
 from mcp import functions
 
+# Test constants
+LARGE_META_SIZE = 200_000  # Should exceed max_total_size for request_human_review (50k)
+
 def test_validate_api_key_env(monkeypatch):
     monkeypatch.setenv("MCP_API_KEYS", "k1,k2")
     assert auth.is_auth_enabled()
@@ -23,6 +26,6 @@ def test_compute_drhash_requires_key_when_enabled(monkeypatch):
 def test_request_human_review_validation(monkeypatch):
     monkeypatch.delenv("MCP_API_KEYS", raising=False)  # disable auth for this test
     # too-large meta should raise ValueError
-    big_meta = {"a": "x" * 200_000}
+    big_meta = {"a": "x" * LARGE_META_SIZE}
     with pytest.raises(ValueError):
         functions.request_human_review("reason", job_id="jid", meta=big_meta)

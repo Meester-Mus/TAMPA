@@ -52,6 +52,9 @@ def validate_function_args(args: Dict[str, Any], allowed_keys: Optional[List[str
         s = json.dumps(args)
         if len(s) > max_total_size:
             raise ValueError("Function arguments exceed max allowed size")
+    except ValueError:
+        # Re-raise our own ValueError as-is
+        raise
     except Exception as e:
-        # If serialization fails, reject
-        raise ValueError("Invalid function arguments") from e
+        # If serialization fails, reject with context
+        raise ValueError(f"Invalid function arguments: {type(e).__name__}") from e

@@ -99,7 +99,9 @@ def request_human_review(reason: str, job_id: str = None, meta: Dict[str, Any] =
         "reason": reason,
         "meta": meta or {},
     }
-    idx = len(list(REVIEW_ROOT.glob("ticket-*.json"))) + 1
-    fname = REVIEW_ROOT / f"ticket-{idx:04d}.json"
+    # Use timestamp-based unique filename to avoid race conditions
+    import uuid
+    ticket_id = f"{int(time.time() * 1000)}-{uuid.uuid4().hex[:8]}"
+    fname = REVIEW_ROOT / f"ticket-{ticket_id}.json"
     fname.write_text(json.dumps(ticket, ensure_ascii=False, indent=2), encoding="utf-8")
     return {"ticket_url": f"/internal/reviews/{fname.name}"}
