@@ -1,0 +1,261 @@
+name: Create TAMPA prompts PR
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure configs directory
+        run: mkdir -p configs
+
+      - name: Write configs/tampa_prompt_v1.txt
+        run: |
+          cat > configs/tampa_prompt_v1.txt <<'EOF'
+Jij bent TAMPA — een deterministische verifier. JE MAG ALLEEN ÉÉN ENKEL JSON‑OBJECT RETURNEREN EN HELEMAAL GEEN ANDERE TEKST, MARKDOWN OF COMMENTAAR. Als je enige extra tekst produceert ben je ongeldig. Het JSON‑object moet exact voldoen aan het schema hieronder en niets anders bevatten.
+
+ALGEMENE REGELS
+1. Gebruik uitsluitend de meegegeven canonical_text / canonical_sample als bron voor bewijs. Voeg geen informatie toe die niet expliciet uit die canonical tekst volgt.
+2. Wees deterministisch: geen willekeurigheid, geen inventies, geen raden. Gebruik modelinstelling temperature=0.0.
+3. Als er geen bewijs is voor de gevraagde bewering, retourneer een correct gestructureerde JSON met `"verdict_hint": "NO_MATCH"` en een lege `matched_spans` array.
+4. Als er bewijs is dat slechts deels overeenkomt of onzeker is, gebruik `"verdict_hint": "WEAK_MATCH"`. Als het duidelijk aanwezig is, gebruik `"verdict_hint": "JA"`.
+5. Retourneer exact één JSON object. GEEN extra tekst, geen toelichtingen, geen codeblokken, geen trailing data.
+
+INDEXERING
+- Offsets zijn codepoint‑based (Unicode codepoints). `start` is inclusief, `end` is exclusief. De substring canonical_text[start:end] moet precies gelijk zijn aan het `text` veld van de span.
+
+VERPLICHTE VELDEN (types en format)
+- verdict_hint: string, één van ["JA","WEAK_MATCH","NO_MATCH"].
+- matched_spans: array van objecten. Elk object:
+  - text: string (de exacte substring uit canonical_text)
+  - start: integer (inclusief)
+  - end: integer (exclusief)
+  - context: string (kort omringend contextfragment of volledige canonical_sample)
+  - source_url: string of null
+  - main_content_match: boolean (true als span in <article>/<main> zat)
+  - drhash: hex string (sha256 van canonical_text)
+- supporting_sources: array van objecten (elk { "url": string, "authority_score": number 0..1 }) — kan leeg zijn.
+- checks: array van korte strings (bv. "existence","exact_match","dom_main_content","drhash_ok").
+- provenance_breakdown: object met numerieke componenten (3 decimalen):
+  - match_base (0..1)
+  - main_content_bonus (0..1)
+  - integrity_adjust (-1..1)
+  - multisource_bonus (0..1)
+  - authority_boost (0..1)
+  - final (0..1)  — finale samengestelde score
+- provenanceConfidence: number (0..1) — gelijk aan provenance_breakdown.final, afgerond op 3 decimals.
+- internal: object met:
+  - drhash: hex string (sha256 van canonical_text)
+  - canonical_sample: string (eerste ~200 chars)
+  - canonicalize_version: string (bv. "canonicalize_v1")
+- runtime_ms: integer (milliseconden)
+- sigma_trace: array van integers (interne stap‑buckets)
+- tampa_sigma: integer (0..12)
+- OPTIONAL maar aangeraden: model_version (string), prompt_version (string)
+
+NUMERIEKE EN FORMAT REGELS
+- Alle scores (provenance_breakdown onderdelen en provenanceConfidence) moeten genormaliseerd zijn tussen 0.000 en 0.995 en afgerond naar 3 decimale plaatsen (use 3 decimals).
+- tampa_sigma = int(round(provenanceConfidence * 12)).
+
+FOUTAFHANDELING
+- Als je de vereiste JSON niet kunt vormen (bv. wegens parse/ambiguity), retourneer een geldig TAMPA JSON met verdict_hint "NO_MATCH" en een lege matched_spans; NIET: probeer te beschrijven waarom buiten het JSON‑object.
+- NOOIT extra veldnamen of vrije tekst toevoegen buiten het genoemde schema.
+
+VOORBEELD (voorbeeld van minimale, correcte structuur — retourneer NIET dit exact maar gebruik dit schema):
+{
+  "verdict_hint": "JA",
+  "matched_spans": [
+    {
+      "text": "Voorbeeld content matched",
+      "start": 0,
+      "end": 25,
+      "context": "Voorbeeld content matched Dit is ...",
+      "source_url": "https://example.com/article",
+      "main_content_match": true,
+      "drhash": "3f2a9b8c..."
+    }
+  ],
+  "supporting_sources": [],
+  "checks": ["existence","exact_match","dom_main_content","drhash_ok"],
+  "provenance_breakdown": {
+    "match_base": 0.700,
+    "main_content_bonus": 0.150,
+    "integrity_adjust": 0.050,
+    "multisource_bonus": 0.000,
+    "authority_boost": 0.000,
+    "final": 0.900
+  },
+  "provenanceConfidence": 0.900,
+  "internal": {
+    "drhash": "3f2a9b8c...",
+    "canonical_sample": "Voorbeeld content matched Dit is ...",
+    "canonicalize_version": "canonicalize_v1"
+  },
+  "runtime_ms": 120,
+  "sigma_trace": [0,3,4,6,12],
+  "tampa_sigma": 11,
+  "model_version": "gpt-4o-mini",
+  "prompt_version": "tampa_prompt_v1"
+}
+
+EINDE — HERINNERING
+- JE MAG ALLEEN DIT ENKEL JSON OBJECT RETURNEREN. Controleer strikt op valid JSON, correcte types en indices. Als je afwijkt, zal de pipeline de output markeren als ongeldig en opslaan als raw output voor menselijke review.
+EOF
+
+      - name: Write configs/tampa_user_template.txt
+        run: |
+          cat > configs/tampa_user_template.txt <<'EOF'
+# User prompt template (invulbare template voor de user message)
+# Vervang de placeholders tussen {} met werkelijke waarden bij elke call.
+
+Query: {QUERY}
+
+Canonical sample (first ~200 chars):
+{CANONICAL_SAMPLE}
+
+Canonical full text:
+{CANONICAL_TEXT}
+
+DRHash (sha256 of canonical_text):
+{DRHASH}
+
+Source URL (if available):
+{SOURCE_URL_OR_NA}
+
+INSTRUCTIE:
+Gebruik alleen bovenstaande canonical_text / canonical_sample / drhash als bron voor bewijs. Volg strikt de system prompt (configs/tampa_prompt_v1.txt) en retourneer EXACT één JSON‑object volgens het TAMPA‑schema. Voeg `prompt_version: "tampa_prompt_v1"` en `model_version` toe in de JSON.
+EOF
+
+      - name: Write configs/tampa_parser_instructions.txt
+        run: |
+          cat > configs/tampa_parser_instructions.txt <<'EOF'
+# Parser instructions for the pipeline (how to treat model responses)
+
+1. Try to parse the entire assistant content as JSON.
+2. If parsing fails, attempt best-effort JSON substring extraction (first '{' to last '}' that parses).
+3. If still failing, save the raw assistant output to {agent_name}_raw.json and mark the job as PENDING / human_review.
+4. If parsed object obtained:
+   a. Run validate_tampa_output(parsed, canonical_text) using datanet.validate_tampa.
+   b. If valid -> save as {agent_name}.json
+   c. If invalid -> save as {agent_name}_invalid.json with the validator reason and mark job for human_review.
+5. Log details: parse_result, validate_reason, model_version, prompt_version, runtime_ms.
+EOF
+
+      - name: Write configs/reviewer_assistant_prompt.txt
+        run: |
+          cat > configs/reviewer_assistant_prompt.txt <<'EOF'
+Reviewer assistant (system):
+Je helpt een menselijke reviewer om een beknopte, gefundeerde rationale te formuleren voor acceptatie of afwijzing van een voorstel om te canoniseren. Gebruik de aangeleverde comparator_report en beide agent outputs om korte, feitelijke bullets te maken. Output mag JSON of platte tekst zijn (reviewer kiest).
+
+User (input instructie):
+Geef:
+- jobId: {JOBID}
+- comparator_report: {COMPARATOR_JSON}
+- tampa_local: {TAMPA_LOCAL_JSON}
+- tampa_chatgpt: {TAMPA_CHATGPT_JSON}
+- snapshot_meta: {SNAPSHOT_META}
+
+Verwachte output (voorbeeld structuur):
+{
+  "decision_recommendation": "ACCEPT" | "REJECT" | "MORE_INFO",
+  "short_rationale": [
+    "Overlap in spans X%, both confidences >= 0.85",
+    "drhash match ok",
+    "chatgpt returned an invalid span index -> manual check required"
+  ],
+  "actions": [
+    "Request second reviewer",
+    "Ask model rerun with narrower prompt"
+  ]
+}
+EOF
+
+      - name: Write configs/canonicalizer_guidance.txt
+        run: |
+          cat > configs/canonicalizer_guidance.txt <<'EOF'
+Canonicalizer guidance (notes for canonicalize_v1 tuning)
+
+- Remove scripts, styles, iframes, svg, canvas and invisible nodes.
+- Prefer <article> or <main> content; if absent, select the largest contiguous text block in <body>.
+- Decode HTML entities and normalize Unicode to NFC.
+- Normalize typographic quotes/dashes to ASCII equivalents.
+- Collapse consecutive whitespace to single spaces and trim ends.
+- Produce canonical_sample as the first ~200 characters of canonical_text.
+- Compute drhash = sha256(canonical_text) hex and include in internal metadata.
+- Log which heuristic was used (article/main/heuristic) in the snapshot metadata for auditing.
+EOF
+
+      - name: Write pr_body.txt
+        run: |
+          cat > pr_body.txt <<'EOF'
+chore(configs): add TAMPA prompts and pipeline guidance
+
+Samenvatting:
+- Voeg meerdere configuratie- en promptbestanden toe voor de TAMPA ChatGPT-agent en pipeline:
+  - configs/tampa_prompt_v1.txt
+  - configs/tampa_user_template.txt
+  - configs/tampa_parser_instructions.txt
+  - configs/reviewer_assistant_prompt.txt
+  - configs/canonicalizer_guidance.txt
+- Deze bestanden leggen een strikt TAMPA‑contract vast (system prompt), bieden een user‑template, definiëren parser/validator gedrag en geven reviewer/canonicalizer richtlijnen.
+
+Waarom:
+- Beperk model‑drift en reduceer parse‑fouten door de system prompt te versioneren en in de repo op te slaan.
+- Zorg dat de pipeline eenduidig weet hoe model‑output geparset, gevalideerd en (indien niet valide) gekwadranteerd wordt.
+- Ondersteun reviewers met gestructureerde prompts en documenteer canonicalizer‑keuzes voor reproduceerbaarheid.
+
+Wat te testen:
+1. Controleer dat de bestanden aanwezig zijn op de opgegeven paden.
+2. E2E (optioneel):
+   - POST /jobs met een sample snapshot.
+   - Zonder OPENAI_API_KEY: POST /jobs/{jobId}/run-remote moet informatief falen of instructie geven om handmatig te POSTen naar /jobs/{jobId}/submit-agent; handmatige agent‑output moet worden opgeslagen.
+   - Met OPENAI_API_KEY: run-remote moet modeloutput ofwel een valide TAMPA JSON teruggeven (en opslaan) of anders *_raw / *_invalid opslaan.
+3. Run pytest om te controleren dat bestaande tests niet breken.
+
+Beperkingen / opmerkingen:
+- De prompt reduceert parse‑fouten, maar garandeert inhoudelijke correctheid niet; alle modeloutputs moeten gevalideerd worden (drhash checks, span index validatie).
+- Commit geen API‑sleutels of private keys. Gebruik environment vars of GitHub Secrets.
+- Voor productie: overweeg pydantic/jsonschema voor strengere validatie en telemetry voor parse/validate failure rates.
+
+Gewijzigde bestanden:
+- configs/tampa_prompt_v1.txt
+- configs/tampa_user_template.txt
+- configs/tampa_parser_instructions.txt
+- configs/reviewer_assistant_prompt.txt
+- configs/canonicalizer_guidance.txt
+
+Checklist vóór merge:
+- [ ] Bestanden aanwezig op correcte paden
+- [ ] Geen secrets of private keys gecommit
+- [ ] CI (pytest) slaagt
+- [ ] Reviewer begrijpt dat modeloutputs nog steeds validatie en mogelijk menselijke review nodig hebben
+
+Instructies voor maintainer:
+- Als de prompt getuned moet worden: update configs/tampa_prompt_v1.txt en incrementeer prompt_version in de pipeline.
+- Monitor parse_failures en validate_failures na deployment en tune prompt/pipeline indien nodig.
+EOF
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: chore(configs): add TAMPA prompts and pipeline guidance (tampa_prompt_v1 + templates)
+          branch: feat/add-tampa-prompts
+          title: chore(configs): add TAMPA prompts and pipeline guidance
+          body-file: pr_body.txt
+          labels: configs, automation
+
+      - name: Print PR link
+        if: success()
+        run: |
+          echo "If the PR was created successfully, check the repository pull requests page."
