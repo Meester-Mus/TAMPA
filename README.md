@@ -92,4 +92,23 @@ Contributie & review
 Contact / hulp
 - Als je hulp nodig hebt bij het toepassen van de patch, het uitvoeren van de script of fixen van CI‑fouten: plak hier de foutmelding en ik help je stap‑voor‑stap.
 
+### Model Context Protocol (MCP) integration
+
+This repo includes a small MCP adapter and schema to generate validated MCP payloads for LLM consumption.
+
+- Schema: src/mcp/schema_mcp.py
+- Adapter: src/mcp/adapter.py
+- Prompt templates: src/mcp/prompts.py
+- Example usage: examples/mcp_call_example.py
+- Tests: tests/test_mcp_adapter.py
+
+Run the MCP tests:
+```bash
+pytest tests/test_mcp_adapter.py -q
+```
+
+Notes:
+- The example uses a local canonicalizer and does not send requests unless you enable your OpenAI/LLM API key locally.
+- The SYSTEM_PROMPT enforces strict use of the MCP payload to reduce hallucinations.
+
 Einde
