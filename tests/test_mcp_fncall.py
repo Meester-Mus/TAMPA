@@ -17,9 +17,7 @@ def test_fetch_and_annotate(tmp_path):
     (jobdir / "meta.json").write_text(json.dumps(meta), encoding="utf-8")
 
     # monkeypatch DATA_ROOT by temporarily modifying the module path
-    import importlib
     import mcp.fncall_handlers as fh
-    import types
     fh.DATA_ROOT = data_dir
 
     payload = fncall_handlers.fetch_full_mcp("job1")
