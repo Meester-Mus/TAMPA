@@ -1,0 +1,7 @@
+{
+  "job_id": "jid-1",
+  "reason": "test",
+  "meta": {
+    "a": 1
+  }
+}
