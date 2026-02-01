@@ -6,6 +6,11 @@ from typing import List, Dict, Any
 
 from mcp import metrics
 
+try:
+    import joblib
+except ImportError:
+    joblib = None  # type: ignore
+
 DATA_ROOT = Path("data")
 REVIEW_ROOT = DATA_ROOT / "human_reviews"
 REVIEW_ROOT.mkdir(parents=True, exist_ok=True)
@@ -34,13 +39,13 @@ def search_documents(query: str, k: int = 3) -> Dict[str, Any]:
                 metrics.observe_search_latency(elapsed)
                 # update doc count gauge if index info available
                 try:
-                    import joblib
-                    idx = Path(DATA_ROOT) / 'mcp_index.joblib'
-                    if idx.exists():
-                        # best-effort: load docs length (fast because small)
-                        data = joblib.load(str(idx))
-                        docs = data.get('docs', [])
-                        metrics.set_index_doc_count(len(docs))
+                    if joblib is not None:
+                        idx = Path(DATA_ROOT) / 'mcp_index.joblib'
+                        if idx.exists():
+                            # best-effort: load docs length (fast because small)
+                            data = joblib.load(str(idx))
+                            docs = data.get('docs', [])
+                            metrics.set_index_doc_count(len(docs))
                 except Exception:
                     pass
                 return out
@@ -79,6 +84,7 @@ def request_human_review(reason: str, job_id: str = None, meta: Dict[str, Any] =
         "reason": reason,
         "meta": meta or {},
     }
+    # TODO: Add lock or atomic file creation to prevent race condition in concurrent environments
     idx = len(list(REVIEW_ROOT.glob("ticket-*.json"))) + 1
     fname = REVIEW_ROOT / f"ticket-{idx:04d}.json"
     fname.write_text(json.dumps(ticket, ensure_ascii=False, indent=2), encoding="utf-8")
