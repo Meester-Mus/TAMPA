@@ -1,0 +1,10 @@
+Canonicalizer guidance (notes for canonicalize_v1 tuning)
+
+- Remove scripts, styles, iframes, svg, canvas and invisible nodes.
+- Prefer <article> or <main> content; if absent, select the largest contiguous text block in <body>.
+- Decode HTML entities and normalize Unicode to NFC.
+- Normalize typographic quotes/dashes to ASCII equivalents.
+- Collapse consecutive whitespace to single spaces and trim ends.
+- Produce canonical_sample as the first ~200 characters of canonical_text.
+- Compute drhash = sha256(canonical_text) hex and include in internal metadata.
+- Log which heuristic was used (article/main/heuristic) in the snapshot metadata for auditing.

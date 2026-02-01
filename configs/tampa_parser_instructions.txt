@@ -1,0 +1,10 @@
+# Parser instructions for the pipeline (how to treat model responses)
+
+1. Try to parse the entire assistant content as JSON.
+2. If parsing fails, attempt best-effort JSON substring extraction (first '{' to last '}' that parses).
+3. If still failing, save the raw assistant output to {agent_name}_raw.json and mark the job as PENDING / human_review.
+4. If parsed object obtained:
+   a. Run validate_tampa_output(parsed, canonical_text) using datanet.validate_tampa.
+   b. If valid -> save as {agent_name}.json
+   c. If invalid -> save as {agent_name}_invalid.json with the validator reason and mark job for human_review.
+5. Log details: parse_result, validate_reason, model_version, prompt_version, runtime_ms.
