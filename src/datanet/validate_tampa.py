@@ -110,6 +110,9 @@ def validate_tampa_output(tampa_json: Dict[str, Any], canonical_text: str) -> Tu
             return False, f"missing_top_field:{field}"
     
     # Step 3: Validate provenanceConfidence and provenance_breakdown.final match
+    # Tolerance of 0.002 accounts for floating-point rounding differences
+    # while ensuring the values are effectively the same (3 decimal places)
+    PROVENANCE_TOLERANCE = 0.002
     pc = output.provenanceConfidence
     pb_final = output.provenance_breakdown.final
     
@@ -117,7 +120,7 @@ def validate_tampa_output(tampa_json: Dict[str, Any], canonical_text: str) -> Tu
     pc_rounded = round(pc, 3)
     pb_final_rounded = round(pb_final, 3)
     
-    if abs(pc_rounded - pb_final_rounded) > 0.002:
+    if abs(pc_rounded - pb_final_rounded) > PROVENANCE_TOLERANCE:
         return False, f"provenance_mismatch:pc={pc_rounded},pb_final={pb_final_rounded}"
     
     # Step 4: Validate provenance ranges

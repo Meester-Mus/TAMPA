@@ -46,8 +46,8 @@ def test_drhash_mismatch_rejects():
     html = "<html><body><p>This is a test document.</p></body></html>"
     canonical_text, canonical_sample, drhash = canonicalize_v1(html)
     
-    # Use wrong drhash
-    wrong_drhash = "0" * 64
+    # Use invalid drhash to test mismatch detection
+    invalid_drhash = "0" * 64
     
     tampa_json = {
         "verdict_hint": "NO_MATCH",
@@ -64,7 +64,7 @@ def test_drhash_mismatch_rejects():
         },
         "provenanceConfidence": 0.000,
         "internal": {
-            "drhash": wrong_drhash,
+            "drhash": invalid_drhash,
             "canonical_sample": canonical_sample,
             "canonicalize_version": "canonicalize_v1"
         },
@@ -275,3 +275,40 @@ def test_provenance_breakdown_mismatch_rejects():
     is_valid, error = validate_tampa_output(tampa_json, canonical_text)
     assert is_valid is False
     assert "provenance_mismatch" in error
+
+
+def test_optional_fields_accepted():
+    """Test that optional fields (model_version, prompt_version) are accepted."""
+    html = "<html><body><p>This is a test document.</p></body></html>"
+    canonical_text, canonical_sample, drhash = canonicalize_v1(html)
+    
+    tampa_json = {
+        "verdict_hint": "NO_MATCH",
+        "matched_spans": [],
+        "supporting_sources": [],
+        "checks": ["drhash_ok"],
+        "provenance_breakdown": {
+            "match_base": 0.000,
+            "main_content_bonus": 0.000,
+            "integrity_adjust": 0.000,
+            "multisource_bonus": 0.000,
+            "authority_boost": 0.000,
+            "final": 0.000
+        },
+        "provenanceConfidence": 0.000,
+        "internal": {
+            "drhash": drhash,
+            "canonical_sample": canonical_sample,
+            "canonicalize_version": "canonicalize_v1"
+        },
+        "runtime_ms": 100,
+        "sigma_trace": [0, 0, 0],
+        "tampa_sigma": 0,
+        "model_version": "gpt-4",
+        "prompt_version": "v1.0"
+    }
+    
+    is_valid, error = validate_tampa_output(tampa_json, canonical_text)
+    assert is_valid is True
+    assert error is None
+
