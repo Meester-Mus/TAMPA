@@ -92,4 +92,20 @@ Contributie & review
 Contact / hulp
 - Als je hulp nodig hebt bij het toepassen van de patch, het uitvoeren van de script of fixen van CI‑fouten: plak hier de foutmelding en ik help je stap‑voor‑stap.
 
+#### Auth / API keys for function calls
+
+You can require callers to provide an API key for function calls by setting the environment variable:
+
+```bash
+export MCP_API_KEYS="key1,key2"
+```
+
+Accepted ways to present the key:
+- Authorization header: `Authorization: Bearer <key>`
+- `X-API-Key: <key>`
+
+If `MCP_API_KEYS` is not set, auth is disabled and function calls remain backwards compatible.
+
+The server validates basic argument sizes and allowed keys to limit abuse; adjust limits in `src/mcp/auth.py` as needed.
+
 Einde
