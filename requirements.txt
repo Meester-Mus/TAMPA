@@ -1,3 +1,3 @@
-scikit-learn
-joblib
-pytest
+scikit-learn>=1.3.0,<2.0.0
+joblib>=1.3.0
+pytest>=7.0.0

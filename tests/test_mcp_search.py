@@ -1,8 +1,6 @@
-from pathlib import Path
 import json
 from mcp import searcher
 from datanet import canonicalize_v1
-import tempfile
 
 
 def test_build_and_search(tmp_path):

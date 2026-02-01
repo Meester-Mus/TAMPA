@@ -14,7 +14,7 @@ REVIEW_ROOT.mkdir(parents=True, exist_ok=True)
 # Try to import the production searcher if present
 try:
     from mcp import searcher
-except Exception:
+except ImportError:
     searcher = None  # type: ignore
 
 
@@ -29,16 +29,12 @@ def search_documents(query: str, k: int = 3) -> Dict[str, Any]:
     Try TF-IDF powered search if the index and searcher are available; otherwise fall back to a simple substring scan over stored meta/snapshots.
     """
     # Prefer production searcher
-    try:
-        if searcher is not None:
-            # use data root path
-            try:
-                return searcher.search_documents(query, k=k, data_root=str(DATA_ROOT))
-            except Exception:
-                # fall through to substring fallback
-                pass
-    except Exception:
-        pass
+    if searcher is not None:
+        try:
+            return searcher.search_documents(query, k=k, data_root=str(DATA_ROOT))
+        except (RuntimeError, FileNotFoundError):
+            # Index not found or not available, fall through to substring fallback
+            pass
 
     # Fallback: simple substring scoring
     results: List[Dict[str, Any]] = []
