@@ -1,0 +1,77 @@
+# feat(mcp): add metrics and observability
+
+This PR adds Prometheus metrics and lightweight instrumentation for MCP function and search usage.
+
+## Changed/Added Files
+
+### New Files:
+1. **src/mcp/metrics.py** - Prometheus metrics definitions including:
+   - `mcp_function_calls_total` - Counter for function calls (labeled by function name)
+   - `mcp_search_latency_seconds` - Histogram for search latency
+   - `mcp_index_document_count` - Gauge for indexed document count
+   - `mcp_validation_failures_total` - Counter for validation failures
+
+2. **src/mcp/functions.py** - Instrumented MCP functions:
+   - `compute_drhash()` - Computes SHA256 hash of canonical text with metrics tracking
+   - `search_documents()` - Searches documents with latency and index size metrics
+   - `request_human_review()` - Creates review tickets with call tracking
+
+3. **tests/test_mcp_metrics.py** - Unit tests for metrics helpers
+
+4. **requirements.txt** - Added `prometheus_client` dependency
+
+5. **.gitignore** - Python artifacts exclusion
+
+### Modified Files:
+- **README.md** - Added metrics documentation section with usage instructions
+
+## Run/Test Instructions
+
+Install dependencies and run tests:
+```bash
+pip install -r requirements.txt
+pip install pytest joblib  # Additional test dependencies
+PYTHONPATH=src:$PYTHONPATH pytest tests/test_mcp_metrics.py -q
+```
+
+Test the functions directly:
+```bash
+cd /home/runner/work/TAMPA/TAMPA
+PYTHONPATH=src:$PYTHONPATH python3 -c "
+from mcp import functions
+result = functions.compute_drhash('test text')
+print('Result:', result)
+"
+```
+
+## Notes on Implementation
+
+### Metrics Design
+- All metrics operations are **best-effort** (wrapped in try/except to prevent application failures)
+- Metrics are **non-blocking** and won't affect application stability
+- Each function call is automatically tracked with the function name as a label
+
+### Production Deployment
+To expose metrics over HTTP in production:
+1. Mount prometheus_client's exposition endpoint (e.g., `/metrics`) in your web server (Flask/FastAPI/Starlette)
+2. Configure Prometheus to scrape the endpoint for monitoring
+
+Example for FastAPI:
+```python
+from prometheus_client import make_asgi_app
+
+metrics_app = make_asgi_app()
+app.mount("/metrics", metrics_app)
+```
+
+### Code Quality
+- ✅ Tests pass
+- ✅ Code review completed and feedback addressed
+- ✅ Security scan (CodeQL) passed with 0 alerts
+- ✅ Joblib import optimized to module level
+- ✅ Race condition in ticket generation documented with TODO
+
+## Security Summary
+- No security vulnerabilities found by CodeQL scanner
+- No credentials or secrets committed
+- All external library dependencies are well-established (prometheus_client)
