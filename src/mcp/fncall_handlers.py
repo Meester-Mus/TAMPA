@@ -41,7 +41,7 @@ def annotate_span(job_id: str, drhash: str, start: int, end: int, note: str) -> 
     if ann_p.exists():
         try:
             anns = json.loads(ann_p.read_text(encoding="utf-8"))
-        except Exception:
+        except (json.JSONDecodeError, OSError):
             anns = []
     ann = {"drhash": drhash, "start": int(start), "end": int(end), "note": note}
     anns.append(ann)
@@ -49,7 +49,7 @@ def annotate_span(job_id: str, drhash: str, start: int, end: int, note: str) -> 
     return ann
 
 
-def export_result(job_id: str, format: str) -> Dict[str, Any]:
+def export_result(job_id: str, export_format: str) -> Dict[str, Any]:
     """Export a simple representation of the job (meta + snapshot sample) to data/{job_id}/export.{ext}
     Returns a dict with export path.
     """
@@ -61,7 +61,7 @@ def export_result(job_id: str, format: str) -> Dict[str, Any]:
     meta = json.loads(meta_p.read_text(encoding="utf-8")) if meta_p.exists() else {}
     snapshot = snapshot_p.read_text(encoding="utf-8") if snapshot_p.exists() else ""
 
-    if format == "json":
+    if export_format == "json":
         out = {"meta": meta, "snapshot_sample": snapshot[:1000]}
         ext = "json"
         content = json.dumps(out, ensure_ascii=False, indent=2)

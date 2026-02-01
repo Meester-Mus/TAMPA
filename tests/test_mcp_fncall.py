@@ -4,7 +4,7 @@ from mcp import fncall_handlers
 from datanet import canonicalize_v1
 
 
-def test_fetch_and_annotate(tmp_path):
+def test_fetch_and_annotate(tmp_path, monkeypatch):
     data_dir = tmp_path / "data"
     data_dir.mkdir()
     jobdir = data_dir / "job1"
@@ -16,9 +16,9 @@ def test_fetch_and_annotate(tmp_path):
     meta = {"url": "https://example.com/job1", "drhash": canonical["drhash"], "canonical_text": canonical["canonical_text"]}
     (jobdir / "meta.json").write_text(json.dumps(meta), encoding="utf-8")
 
-    # monkeypatch DATA_ROOT by temporarily modifying the module path
+    # Use pytest's monkeypatch fixture to modify DATA_ROOT
     import mcp.fncall_handlers as fh
-    fh.DATA_ROOT = data_dir
+    monkeypatch.setattr(fh, "DATA_ROOT", data_dir)
 
     payload = fncall_handlers.fetch_full_mcp("job1")
     assert payload["job_id"] == "job1"
