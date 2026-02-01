@@ -77,6 +77,25 @@ Waar te kijken bij issues
 - validation failures: JSON bestaat maar faalt schema/index checks — opgeslagen als `{agent_name}_invalid` met reden.
 - drhash mismatches: controleer canonicalize_v1 en drhash berekening.
 
+MCP integration
+
+#### Function calling (model tools)
+
+This repo ships example function schemas and server-side stubs enabling the model to call tools:
+- Function definitions: src/mcp/function_schemas.py
+- Server stubs: src/mcp/functions.py
+- Example usage: examples/mcp_fncall_example.py
+
+Pattern:
+1. Provide `functions` list to the model (SDK param).
+2. If model returns `function_call`, execute the named function server-side.
+3. Return function output to model as a `function` role message for the model to continue.
+
+Run the small unit tests:
+```bash
+pytest tests/test_mcp_functions.py -q
+```
+
 Security & secrets
 - NOOIT API‑sleutels of secrets in de repo committen.
 - Gebruik environment variables of GitHub Secrets:
