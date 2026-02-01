@@ -1,0 +1,51 @@
+MCP INTEGRATION — Model Confidence Protocol
+
+DOEL
+Het MCP (Model Confidence Protocol) biedt een gestandaardiseerd formaat voor het vastleggen van:
+- Gecanoniseerde tekst met metadata (drhash, source, versie)
+- Provenance scores met gedetailleerde breakdown
+- Matched spans met context en bron-informatie
+- Tool specifications voor verificatie endpoints
+
+GEBRUIK
+1. MCP schema (src/mcp/schema_mcp.py):
+   - Definieert pydantic models voor alle MCP componenten
+   - Valideert velden en boundaries (bv. provenance 0.0-0.995)
+   - Ondersteunt serialisatie naar JSON
+
+2. MCP adapter (src/mcp/adapter.py):
+   - Bouwt MCP payloads vanuit canonicalize_v1 output
+   - Genereert automatisch drhash als ontbrekend
+   - Normaliseert en valideert alle data
+   
+   Voorbeeld:
+   ```python
+   from src.mcp.adapter import build_mcp_payload
+   
+   canonical = {
+       "canonical_text": "...",
+       "source_url": "https://example.com"
+   }
+   provenance = {
+       "provenanceConfidence": 0.85,
+       "provenance_breakdown": {...}
+   }
+   
+   mcp = build_mcp_payload(canonical, provenance)
+   ```
+
+VEREISTEN
+- Provenance confidence: 0.0 - 0.995 (niet 1.0 voor onzekerheid)
+- Integrity adjust: -1.0 tot 1.0
+- Matched spans: exacte start/end indices (Unicode codepoints)
+- Tools: optionele verificatie endpoints
+
+TESTEN
+Tests in tests/test_mcp.py valideren:
+- Schema boundaries en defaults
+- Adapter transformaties
+- Drhash generatie
+- Matched spans mapping
+
+Voor integratie met TAMPA verifier: combineer canonicalize_v1 output met
+TAMPA provenance scores om complete MCP payloads te genereren.
