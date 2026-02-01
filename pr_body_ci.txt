@@ -24,4 +24,4 @@ The CI workflow will execute:
 ## Notes
 - The workflow uses Python 3.9 as mentioned in the README
 - Tests are run with pytest in quiet mode for cleaner output
-- No dependencies installation step is included yet (can be added if requirements.txt is present)
+- Dependencies are installed from requirements.txt if the file is present
