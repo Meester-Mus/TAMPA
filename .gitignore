@@ -1,0 +1,6 @@
+/data/*.faiss
+/data/faiss_index*.joblib
+*.faiss
+*.joblib
+__pycache__/
+*.pyc
