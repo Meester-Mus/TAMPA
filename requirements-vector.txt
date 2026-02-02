@@ -1,0 +1,5 @@
+# Heavy dependencies for FAISS vector prototype (install in dedicated CI job or locally)
+faiss-cpu
+sentence-transformers
+numpy
+joblib

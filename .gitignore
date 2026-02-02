@@ -1,0 +1,4 @@
+/data/*.faiss
+/data/faiss_index*.joblib
+*.faiss
+*.joblib
